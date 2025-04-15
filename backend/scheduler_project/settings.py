@@ -11,21 +11,32 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import environ
+
+# Initialize environ
+env = environ.Env(DEBUG=(bool, False))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Take environment variables from .env file
+environ.Env.read_env(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-xau)@a6m-tca!wr*tft3!44v8vtl6wwa%%x*b0vb6ip+q-bz*o'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
+# It's recommended to set DEBUG = env.bool('DEBUG', default=False) for production
+# For now, keeping it True as per original, but reading from env if set
+DEBUG = env.bool('DEBUG', default=True)
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
 
 # Application definition
@@ -76,14 +87,7 @@ WSGI_APPLICATION = 'scheduler_project.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'scheduler',
-        'USER': 'avnadmin',
-        'PASSWORD': 'AVNS_JJI2PAqtz0kJrNvgow3', # Consider using environment variables for sensitive data
-        'HOST': 'postgres-kneelesh48.h.aivencloud.com',
-        'PORT': '26739',
-    }
+    'default': env.db('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}')
 }
 
 
@@ -130,9 +134,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Celery Configuration Options
 # Using Redis as the message broker
-CELERY_BROKER_URL = 'rediss://default:AVNS_GYCbqMC7YqnH2qTkUt9@valkey-d37899f-kneelesh48.f.aivencloud.com:26740/0?ssl_cert_reqs=required' # Added SSL param to URL
-# Using Redis as the result backend (optional, but good for tracking task states)
-CELERY_RESULT_BACKEND = 'rediss://default:AVNS_GYCbqMC7YqnH2qTkUt9@valkey-d37899f-kneelesh48.f.aivencloud.com:26740/0?ssl_cert_reqs=required' # Added SSL param to URL
+CELERY_BROKER_URL = env('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND_URL')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -164,10 +167,10 @@ BROKER_TRANSPORT_OPTIONS = {
 # CELERY_REDIS_BACKEND_USE_SSL = {'ssl_cert_reqs': 'CERT_REQUIRED'} # Removed
 
 # Reddit API Credentials
-REDDIT_CLIENT_ID = 'zkorJeDPCHAjU2FzhE-SmQ'
-REDDIT_CLIENT_SECRET = 'lt481hsPmKs9vRaItF3MVqwSiGvz0w' # IMPORTANT: Use environment variables in production!
-REDDIT_REDIRECT_URI = 'http://127.0.0.1:8000/reddit/callback'
-REDDIT_USER_AGENT = 'web:reddit-scheduler:v0.1 (by /u/BoJackHorseMan53)' # Replace with your app name and Reddit username
+REDDIT_CLIENT_ID = env('REDDIT_CLIENT_ID')
+REDDIT_CLIENT_SECRET = env('REDDIT_CLIENT_SECRET')
+REDDIT_REDIRECT_URI = env('REDDIT_REDIRECT_URI')
+REDDIT_USER_AGENT = env('REDDIT_USER_AGENT')
 
 # Celery Beat Settings
 CELERY_BEAT_SCHEDULE = {
