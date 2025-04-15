@@ -7,3 +7,4 @@ djangorestframework==3.16.0
 django-filter==25.1
 croniter==6.0.0
 gevent==24.11.1
+django-environ==0.11.2
