@@ -20,5 +20,3 @@ dependencies = [
     "psycopg2-binary==2.9.10",
     "redis==5.2.1",
 ]
-
-# django-celery-beat required?
