@@ -172,7 +172,7 @@ BROKER_TRANSPORT_OPTIONS = {
 CELERY_BEAT_SCHEDULE = {
     'schedule-due-posts-every-minute': {
         'task': 'reddit.tasks.schedule_due_posts',
-        'schedule': crontab(minute='*'), # Run every minute
+        'schedule': crontab(minute='*'),
     }
 }
 

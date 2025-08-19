@@ -92,7 +92,6 @@ class SubmittedPost(models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
     removed_at = models.DateTimeField(null=True, blank=True, help_text="When the post was removed")
     removed_by = models.CharField(max_length=100, null=True, blank=True, help_text="Who removed the post (moderator, admin, etc.)")
-    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
