@@ -4,6 +4,13 @@ from django.core.exceptions import ValidationError
 
 
 class RedditAccount(models.Model):
+    STATUS_CHOICES = [
+        ("active", "Active"),
+        ("suspended", "Suspended"),
+        ("shadow_banned", "Shadow Banned"),
+        ("banned", "Banned"),
+    ]
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -11,11 +18,18 @@ class RedditAccount(models.Model):
     )
     reddit_username = models.CharField(max_length=100)
     refresh_token = models.CharField(max_length=255)
+    reddit_account_status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="active",
+        db_index=True,
+        help_text="The status of the Reddit account (e.g., active, suspended).",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ['user', 'reddit_username']
+        unique_together = ["user", "reddit_username"]
 
     def __str__(self):
         return f"{self.user.username} | {self.reddit_username}"
@@ -43,7 +57,7 @@ class ScheduledPost(models.Model):
     subreddit = models.CharField(max_length=100)
     title = models.CharField(max_length=300)
     selftext = models.TextField()
-    cron = models.CharField(max_length=100)
+    cron_schedule = models.CharField(max_length=100)
     end_date = models.DateTimeField(null=True, blank=True)
     next_run = models.DateTimeField(null=True, blank=True, db_index=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="active", db_index=True)
