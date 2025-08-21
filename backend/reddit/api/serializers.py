@@ -60,7 +60,7 @@ class ScheduledPostSerializer(serializers.ModelSerializer):
             "status",
             "last_submission_error",
             "last_run_started",
-            "last_run_finished"
+            "last_run_finished",
             "created_at",
             "updated_at",
         ]
