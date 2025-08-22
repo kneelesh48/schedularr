@@ -33,7 +33,7 @@ export const colorSchemes = {
   },
 
   indigo: {
-    name: "purple",
+    name: "indigo",
     primary: {
       50: "indigo-50",
       100: "indigo-100",
