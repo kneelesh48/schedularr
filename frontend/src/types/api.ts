@@ -57,6 +57,7 @@ export interface RedditAccount {
   id: number;
   user: string;
   reddit_username: string;
+  reddit_account_status: 'active' | 'suspended' | 'shadow_banned' | 'banned';
   created_at: string;
   updated_at: string;
 }
@@ -79,15 +80,16 @@ export interface ScheduledPost {
   reddit_account_username: string;
   subreddit: string;
   title: string;
-  body: string;
-  cron_schedule: string | null;
-  next_run_time: string | null; // ISO format string
-  end_date: string | null; // ISO format string
-  status: 'pending' | 'posted' | 'failed' | 'cancelled';
-  reddit_post_id: string | null;
+  selftext: string;
+  cron_schedule: string;
+  next_run: string | null;
+  end_date: string | null;
+  status: 'active' | 'paused' | 'completed' | 'error';
   last_submission_error: string | null;
-  created_at: string; // ISO format string
-  updated_at: string; // ISO format string
+  last_run_started: string | null;
+  last_run_finished: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export type ScheduledPostData = Omit<
@@ -96,9 +98,10 @@ export type ScheduledPostData = Omit<
   | 'username'
   | 'user'
   | 'reddit_account_username'
-  | 'next_run_time'
-  | 'reddit_post_id'
+  | 'next_run'
   | 'last_submission_error'
+  | 'last_run_started'
+  | 'last_run_finished'
   | 'created_at'
   | 'updated_at'
   | 'status'
@@ -131,7 +134,7 @@ export interface ApiError {
   message: string;
   code?: string;
   status?: number;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 export interface ValidationError extends ApiError {
@@ -140,7 +143,7 @@ export interface ValidationError extends ApiError {
 
 // ===== API Response Wrapper =====
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data: T;
   message?: string;
   status: number;
