@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from croniter import croniter, CroniterError
 
-from ..models import RedditAccount, ScheduledPost
+from ..models import RedditAccount, ScheduledPost, SubmittedPost
 
 
 User = get_user_model()
@@ -103,3 +103,35 @@ class ScheduledPostSerializer(serializers.ModelSerializer):
         except ValueError as e:
             raise serializers.ValidationError(f"Error validating cron schedule '{value}': {e}")
         return value
+
+
+class SubmittedPostSerializer(serializers.ModelSerializer):
+    scheduled_post_title = serializers.CharField(source="scheduled_post.title", read_only=True)
+    subreddit = serializers.CharField(source="scheduled_post.subreddit", read_only=True)
+
+    class Meta:
+        model = SubmittedPost
+        fields = [
+            "id",
+            "scheduled_post",
+            "scheduled_post_title",
+            "subreddit", 
+            "reddit_post_id",
+            "reddit_url",
+            "submitted_at",
+            "removed_at",
+            "removed_by",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "id",
+            "scheduled_post",
+            "scheduled_post_title",
+            "subreddit",
+            "reddit_post_id",
+            "reddit_url",
+            "submitted_at",
+            "removed_at",
+            "removed_by",
+            "updated_at",
+        ]

@@ -12,5 +12,9 @@ urlpatterns = [
     # Posts endpoints
     path('posts/', views.ScheduledPostListView.as_view(), name='api_posts_list_create'),
     path('posts/<int:pk>/', views.ScheduledPostDetailView.as_view(), name='api_posts_detail'),
-    
+    path('posts/<int:scheduled_post_id>/submissions/', views.ScheduledPostSubmittedPostsView.as_view(), name='api_scheduled_post_submitted_posts'),
+
+    # Submitted posts endpoints
+    path('submissions/', views.SubmittedPostListView.as_view(), name='api_submitted_posts_list'),
+    path('submissions/<int:pk>/', views.SubmittedPostDetailView.as_view(), name='api_submitted_posts_detail'),
 ]

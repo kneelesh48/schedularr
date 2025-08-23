@@ -7,8 +7,8 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
 from ..utils import calculate_next_run
-from ..models import RedditAccount, ScheduledPost
-from .serializers import ScheduledPostSerializer, RedditAccountSerializer
+from ..models import RedditAccount, ScheduledPost, SubmittedPost
+from .serializers import ScheduledPostSerializer, RedditAccountSerializer, SubmittedPostSerializer
 
 User = get_user_model()
 
@@ -161,3 +161,35 @@ class ScheduledPostDetailView(generics.RetrieveUpdateDestroyAPIView):
                 next_run = None
 
         serializer.save(next_run=next_run)
+
+
+class SubmittedPostListView(generics.ListAPIView):
+    serializer_class = SubmittedPostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return SubmittedPost.objects.filter(
+            scheduled_post__user=self.request.user
+        ).select_related('scheduled_post')
+
+
+class SubmittedPostDetailView(generics.RetrieveAPIView):
+    serializer_class = SubmittedPostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return SubmittedPost.objects.filter(
+            scheduled_post__user=self.request.user
+        ).select_related('scheduled_post')
+
+
+class ScheduledPostSubmittedPostsView(generics.ListAPIView):
+    serializer_class = SubmittedPostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        scheduled_post_id = self.kwargs['scheduled_post_id']
+        return SubmittedPost.objects.filter(
+            scheduled_post=scheduled_post_id,
+            scheduled_post__user=self.request.user
+        ).select_related('scheduled_post')
