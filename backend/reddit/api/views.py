@@ -1,6 +1,3 @@
-import datetime as dt
-
-from croniter import croniter
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from rest_framework import generics, status
@@ -9,24 +6,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
+from ..utils import calculate_next_run
 from ..models import RedditAccount, ScheduledPost
 from .serializers import ScheduledPostSerializer, RedditAccountSerializer
 
 User = get_user_model()
-
-
-def calculate_next_run(cron_schedule_str: str) -> dt.datetime:
-    if not cron_schedule_str:
-        return None
-
-    now = dt.datetime.now(dt.timezone.utc)
-    try:
-        cron = croniter(cron_schedule_str, now)
-        next_run = cron.get_next(dt.datetime)
-        return next_run
-    except Exception as e:
-        print(f"Error calculating next run time for '{cron_schedule_str}': {e}")
-        return None
 
 
 class RedditAccountListView(generics.ListAPIView):
@@ -140,13 +124,13 @@ class ScheduledPostListView(generics.ListCreateAPIView):
             raise ValidationError("You must link at least one Reddit account before creating scheduled posts.")
 
         cron_schedule = serializer.validated_data.get("cron_schedule")
-        next_run_time = None
+        next_run = None
         if cron_schedule:
-            next_run_time = calculate_next_run(cron_schedule)
-            if next_run_time is None:
+            next_run = calculate_next_run(cron_schedule)
+            if next_run is None:
                 raise ValidationError(f"Failed to calculate next run time for cron schedule: {cron_schedule}")
 
-        serializer.save(user=self.request.user, next_run_time=next_run_time)
+        serializer.save(user=self.request.user, next_run=next_run)
 
 
 class ScheduledPostDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -164,16 +148,16 @@ class ScheduledPostDetailView(generics.RetrieveUpdateDestroyAPIView):
             "cron_schedule", original_cron_schedule
         )
 
-        next_run_time = instance.next_run_time
+        next_run = instance.next_run
 
         if new_cron_schedule != original_cron_schedule:
             if new_cron_schedule:
-                next_run_time = calculate_next_run(new_cron_schedule)
-                if next_run_time is None:
+                next_run = calculate_next_run(new_cron_schedule)
+                if next_run is None:
                     raise ValidationError(
                         f"Failed to calculate next run time for cron schedule: {new_cron_schedule}"
                     )
             else:
-                next_run_time = None
+                next_run = None
 
-        serializer.save(next_run_time=next_run_time)
+        serializer.save(next_run=next_run)
