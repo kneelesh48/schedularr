@@ -9,32 +9,16 @@ export interface AccountStorage {
 
 class LocalStorageAccountStorage implements AccountStorage {
   getSelectedAccountId(): number | null {
-    try {
-      const saved = localStorage.getItem(SELECTED_ACCOUNT_KEY);
-      return saved ? parseInt(saved, 10) : null;
-    } catch (error) {
-      console.warn("Failed to read selected account from localStorage:", error);
-      return null;
-    }
+    const saved = localStorage.getItem(SELECTED_ACCOUNT_KEY);
+    return saved ? parseInt(saved, 10) : null;
   }
 
   setSelectedAccountId(accountId: number): void {
-    try {
-      localStorage.setItem(SELECTED_ACCOUNT_KEY, accountId.toString());
-    } catch (error) {
-      console.warn("Failed to save selected account to localStorage:", error);
-    }
+    localStorage.setItem(SELECTED_ACCOUNT_KEY, accountId.toString());
   }
 
   clearSelectedAccountId(): void {
-    try {
-      localStorage.removeItem(SELECTED_ACCOUNT_KEY);
-    } catch (error) {
-      console.warn(
-        "Failed to clear selected account from localStorage:",
-        error
-      );
-    }
+    localStorage.removeItem(SELECTED_ACCOUNT_KEY);
   }
 
   hasSelectedAccount(): boolean {
