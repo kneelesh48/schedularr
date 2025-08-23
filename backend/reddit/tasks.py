@@ -9,9 +9,9 @@ from prawcore.exceptions import (
     Redirect,
 )
 from celery import shared_task
-from croniter import croniter, CroniterError
 from django.conf import settings
 
+from .utils import calculate_next_run
 from .models import RedditAccount, ScheduledPost, SubmittedPost
 
 NON_RETRYABLE_ERRORS = (
@@ -27,11 +27,11 @@ NON_RETRYABLE_ERRORS = (
 
 @shared_task(ignore_result=True)
 def schedule_due_posts():
-    now = dt.datetime.now()
+    now = dt.datetime.now(dt.timezone.utc)
     try:
         due_posts = ScheduledPost.objects.filter(
-            status__in=["active", "pending_retry"], next_run_time__lte=now
-        ) | ScheduledPost.objects.filter(status="active", next_run_time__isnull=True)
+            status__in=["active", "pending_retry"], next_run__lte=now
+        ) | ScheduledPost.objects.filter(status="active", next_run__isnull=True)
 
         due_posts = due_posts.distinct()
 
@@ -71,11 +71,11 @@ def submit_reddit_post(self, post_id):
         )
         reddit.user.me().name
 
-        post.last_run_started = dt.datetime.now()
+        post.last_run_started = dt.datetime.now(dt.timezone.utc)
         submission = reddit.subreddit(post.subreddit).submit(
             title=post.title, selftext=post.selftext
         )
-        post.last_run_finished = dt.datetime.now()
+        post.last_run_finished = dt.datetime.now(dt.timezone.utc)
 
         post.last_submission_error = None
 
@@ -87,17 +87,13 @@ def submit_reddit_post(self, post_id):
         # update_reddit_account_status.delay(post.reddit_account.id)
 
         next_run = None
-        if post.cron_schedule:
-            now = dt.datetime.now()
-            try:
-                cron = croniter(post.cron_schedule, now)
-                next_run = cron.get_next(dt.datetime)
-            except (CroniterError, ValueError) as cron_e:
-                post.status = "error"
-                post.last_submission_error = f"Invalid cron schedule: {cron_e}"
-                post.next_run = None
-                post.save()
-                return
+        next_run = calculate_next_run(post.cron_schedule)
+        if next_run is None:
+            post.status = "error"
+            post.last_submission_error = "Failed to calculate next run time."
+            post.next_run = None
+            post.save()
+            return
 
         if not post.cron_schedule:
             post.status = "completed"
