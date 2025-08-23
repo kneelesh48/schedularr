@@ -81,7 +81,7 @@ export interface ScheduledPost {
   subreddit: string;
   title: string;
   selftext: string;
-  cron_schedule: string;
+  cron_schedule: string | null;
   next_run: string | null;
   end_date: string | null;
   status: 'active' | 'paused' | 'completed' | 'error';
@@ -95,36 +95,49 @@ export interface ScheduledPost {
 export type ScheduledPostData = Omit<
   ScheduledPost,
   | 'id'
-  | 'username'
   | 'user'
+  | 'username'
   | 'reddit_account_username'
   | 'next_run'
+  | 'status'
   | 'last_submission_error'
   | 'last_run_started'
   | 'last_run_finished'
   | 'created_at'
   | 'updated_at'
-  | 'status'
->;
+> & {
+  cron_schedule: string | null;
+};
 
 export type ScheduledPostUpdate = Partial<ScheduledPostData>;
+
+// ===== Submitted Post Types =====
+
+export interface SubmittedPost {
+  id: number;
+  scheduled_post: number;
+  reddit_post_id: string;
+  reddit_url: string | null;
+  submitted_at: string;
+  removed_at: string | null;
+  removed_by: string | null;
+  updated_at: string;
+}
 
 // ===== Dashboard Types =====
 
 export interface DashboardData {
   user: {
-    id: number;
     username: string;
-    email: string;
+    is_authenticated: boolean;
   };
-  reddit_accounts: RedditAccount[];
-  scheduled_posts_count: number;
-  recent_posts: ScheduledPost[];
-  stats: {
-    total_posts: number;
-    successful_posts: number;
-    failed_posts: number;
-    pending_posts: number;
+  reddit_accounts: {
+    is_linked: boolean;
+    accounts: RedditAccount[];
+    count: number;
+  };
+  links: {
+    reddit_login: string;
   };
 }
 

@@ -12,6 +12,7 @@ import type {
   ScheduledPost,
   ScheduledPostData,
   ScheduledPostUpdate,
+  SubmittedPost,
   DashboardData
 } from '../types/api';
 
@@ -176,6 +177,19 @@ export const getRedditLoginUrl = async (): Promise<string> => {
 
 export const getRedditAccounts = async (): Promise<RedditAccount[]> => {
   const response = await apiClient.get('/api/reddit/user/accounts/');
+  return response.data;
+};
+
+export const getSubmittedPosts = async (scheduledPostId?: number): Promise<SubmittedPost[]> => {
+  const url = scheduledPostId 
+    ? `/api/reddit/posts/${scheduledPostId}/submissions/`
+    : '/api/reddit/submissions/';
+  const response = await apiClient.get(url);
+  return response.data;
+};
+
+export const getSubmittedPost = async (id: number): Promise<SubmittedPost> => {
+  const response = await apiClient.get(`/api/reddit/submissions/${id}/`);
   return response.data;
 };
 
