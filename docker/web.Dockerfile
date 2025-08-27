@@ -22,8 +22,8 @@ RUN uv sync --frozen
 
 COPY backend ./
 
-RUN mkdir -p staticfiles && \
-    mkdir -p /home/appuser/.cache/uv && \
+RUN mkdir -p /home/appuser/.cache/uv && \
+    mkdir -p staticfiles && \
     uv run manage.py collectstatic --noinput && \
     chown -R appuser:appuser /app /home/appuser
 
