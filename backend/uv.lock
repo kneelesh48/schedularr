@@ -59,7 +59,7 @@ requires-dist = [
     { name = "celery", specifier = "==5.5.1" },
     { name = "croniter", specifier = "==6.0.0" },
     { name = "django", specifier = "==5.2" },
-    { name = "django-celery-beat", specifier = "==2.8.1" },
+    { name = "django-celery-beat", specifier = ">=2.8.1" },
     { name = "django-cors-headers", specifier = "==4.3.1" },
     { name = "django-environ", specifier = "==0.11.2" },
     { name = "django-filter", specifier = "==25.1" },
