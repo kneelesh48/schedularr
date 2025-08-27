@@ -97,13 +97,13 @@ cp backend/.env.example backend/.env
 
 2. **Deploy with Docker:**
 ```bash
-docker-compose up -d
+docker compose up -d
 
 # Apply database migrations
-docker-compose exec web uv run python manage.py migrate
+docker compose exec web uv run python manage.py migrate
 
 # Create superuser (optional)
-docker-compose exec web uv run python manage.py createsuperuser
+docker compose exec web uv run python manage.py createsuperuser
 ```
 
 3. **Access production app:**
@@ -187,20 +187,20 @@ npm run lint
 ### Horizontal Scaling
 ```bash
 # Scale workers for high load
-docker-compose up -d --scale worker=5
+docker compose up -d --scale worker=5
 
 # Scale web servers
-docker-compose up -d --scale web=3
+docker compose up -d --scale web=3
 ```
 
 ### Monitoring
 ```bash
 # View service logs
-docker-compose logs -f worker
-docker-compose logs -f web
+docker compose logs -f worker
+docker compose logs -f web
 
 # Health check status
-docker-compose ps
+docker compose ps
 ```
 
 ## 🔒 Security
@@ -222,16 +222,6 @@ docker-compose ps
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🗺️ Roadmap
-
-- [ ] Calendar view with drag-and-drop scheduling
-- [ ] Post templates and content suggestions
-- [ ] Advanced analytics and reporting
-- [ ] Webhook notifications
-- [ ] Mobile app (iOS/Android)
-- [ ] Team collaboration features
-- [ ] AI-powered posting optimization
 
 ---
 
