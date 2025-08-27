@@ -29,9 +29,6 @@ RUN mkdir -p staticfiles && \
 
 USER appuser
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/api/reddit/dashboard/ || exit 1
-
 EXPOSE 8000
 
 CMD ["uv", "run", "gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120", "backend.wsgi:application"]
