@@ -31,4 +31,4 @@ USER appuser
 
 EXPOSE 8000
 
-CMD ["uv", "run", "gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120", "backend.wsgi:application"]
+CMD ["uv", "run", "gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120", "--log-level", "info", "backend.wsgi:application"]
