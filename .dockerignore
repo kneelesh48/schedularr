@@ -1,6 +1,6 @@
 .git
 backend/.env
-backend/venv
+backend/.venv
 frontend/node_modules
 *.pyc
 __pycache__
