@@ -2,7 +2,7 @@
 
 A powerful, cloud-native web application that enables users to schedule Reddit posts with advanced recurring patterns and multi-account support. Built with Django REST Framework and React TypeScript.
 
-![Schedularr Dashboard](./frontend/public/reddit-scheduler-dashboard-orange.png)
+![Schedularr Dashboard](./frontend/public/schedularr-dashboard-orange.png)
 
 ## ✨ Features
 
