@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import platform
 from pathlib import Path
 from datetime import timedelta
 
@@ -153,6 +154,11 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
+# Windows compatibility settings
+if platform.system() == 'Windows':
+    CELERY_WORKER_POOL = 'solo'
+    CELERY_WORKER_CONCURRENCY = 1
+
 BROKER_CONNECTION_RETRY_ON_STARTUP = True
 BROKER_CONNECTION_RETRY = True
 
@@ -190,8 +196,9 @@ FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
