@@ -43,13 +43,8 @@ services:
       - backend/.env
     environment:
       - DEBUG=False
-      - SECRET_KEY=${SECRET_KEY}
-      - DATABASE_URL=${DATABASE_URL}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND_URL=redis://redis:6379/0
-      - REDDIT_CLIENT_ID=${REDDIT_CLIENT_ID}
-      - REDDIT_CLIENT_SECRET=${REDDIT_CLIENT_SECRET}
-      - REDDIT_USER_AGENT=${REDDIT_USER_AGENT}
     depends_on:
       db:
         condition: service_healthy
@@ -66,8 +61,6 @@ services:
       - backend/.env
     environment:
       - DEBUG=False
-      - SECRET_KEY=${SECRET_KEY}
-      - DATABASE_URL=${DATABASE_URL}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND_URL=redis://redis:6379/0
     depends_on:
@@ -86,14 +79,9 @@ services:
       - backend/.env
     environment:
       - DEBUG=False
-      - SECRET_KEY=${SECRET_KEY}
-      - DATABASE_URL=${DATABASE_URL}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND_URL=redis://redis:6379/0
-      - REDDIT_CLIENT_ID=${REDDIT_CLIENT_ID}
-      - REDDIT_CLIENT_SECRET=${REDDIT_CLIENT_SECRET}
       - REDDIT_REDIRECT_URI=${REDDIT_REDIRECT_URI:-http://localhost:8080/reddit/callback}
-      - REDDIT_USER_AGENT=${REDDIT_USER_AGENT}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8080}
     depends_on:
       db:
