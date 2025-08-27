@@ -116,7 +116,7 @@ docker-compose exec web uv run python manage.py createsuperuser
 ### Environment Variables
 
 Key configuration options in `backend/.env`:
-Check [.backend/.env.example](.backend/.env.example)
+Check [backend/.env.example](backend/.env.example)
 
 ## 📋 Usage
 
