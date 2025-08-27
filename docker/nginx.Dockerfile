@@ -14,9 +14,6 @@ COPY --from=frontend-build /app/dist /usr/share/nginx/html
 
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
-RUN addgroup -g 101 -S nginx && \
-    adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx
-
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
 
