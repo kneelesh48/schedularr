@@ -32,7 +32,7 @@ class RedditAccount(models.Model):
         unique_together = ["user", "reddit_username"]
 
     def __str__(self):
-        return f"{self.user.username} | {self.reddit_username}"
+        return f"{self.reddit_username}"
 
 
 class ScheduledPost(models.Model):
@@ -58,8 +58,8 @@ class ScheduledPost(models.Model):
     title = models.CharField(max_length=300)
     selftext = models.TextField()
     cron_schedule = models.CharField(max_length=100)
-    end_date = models.DateTimeField(null=True, blank=True)
     next_run = models.DateTimeField(null=True, blank=True, db_index=True)
+    end_date = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="active", db_index=True)
     last_submission_error = models.TextField(null=True, blank=True)
 
@@ -70,7 +70,7 @@ class ScheduledPost(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"'{self.title}' for r/{self.subreddit} by {self.user.username} via {self.reddit_account.reddit_username} ({self.status})"
+        return f"{self.title}"
 
     def clean(self):
         if self.reddit_account and self.reddit_account.user != self.user:
