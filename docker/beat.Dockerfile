@@ -21,7 +21,8 @@ RUN uv sync --frozen
 
 COPY backend ./
 
-RUN chown -R appuser:appuser /app
+RUN mkdir -p /home/appuser/.cache/uv && \
+    chown -R appuser:appuser /app /home/appuser
 
 USER appuser
 
