@@ -24,6 +24,7 @@ COPY backend ./
 
 RUN mkdir -p staticfiles && \
     mkdir -p /home/appuser/.cache/uv && \
+    uv run python manage.py collectstatic --noinput && \
     chown -R appuser:appuser /app /home/appuser
 
 USER appuser
