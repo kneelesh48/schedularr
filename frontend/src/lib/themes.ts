@@ -65,8 +65,8 @@ export const colorSchemes = {
 };
 
 export const brandAssets = {
+  brandName: "Schedularr",
   BrandIcon: Rocket,
-  brandName: "RedditScheduler",
 };
 
 export const currentTheme = colorSchemes.indigo;
