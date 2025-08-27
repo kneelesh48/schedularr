@@ -82,8 +82,7 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      web:
-        condition: service_healthy
+      - web
     restart: unless-stopped
 
 volumes:
