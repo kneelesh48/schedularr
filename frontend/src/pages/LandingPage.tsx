@@ -81,7 +81,7 @@ export default function LandingPage() {
               </p>
               <div className="w-full max-w-4xl mt-8">
                 <img
-                  src={`/schedularr-dashboard-${currentTheme.name}.png`}
+                  src={`/dashboard-${currentTheme.name}.png`}
                   alt="Reddit Scheduler Dashboard"
                   width={800}
                   height={400}
