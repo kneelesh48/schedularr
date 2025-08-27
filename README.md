@@ -7,6 +7,7 @@ A powerful, cloud-native web application that enables users to schedule Reddit p
 ## ✨ Features
 
 ### Core Functionality
+
 - **📅 Flexible Scheduling**: One-time or recurring posts with cron expressions
 - **🔄 Multi-Account Support**: Connect and manage multiple Reddit accounts
 - **⚡ Real-time Dashboard**: Monitor scheduled posts and account status
@@ -14,6 +15,7 @@ A powerful, cloud-native web application that enables users to schedule Reddit p
 - **📊 Post Analytics**: Track submission history and success rates
 
 ### Advanced Features
+
 - **🎯 Smart Retry Logic**: Intelligent error handling with exponential backoff
 - **🚦 Status Management**: Real-time post status tracking (active, queued, completed, error)
 - **📋 Intuitive UI**: Modal-based post creation and editing
@@ -23,6 +25,7 @@ A powerful, cloud-native web application that enables users to schedule Reddit p
 ## 🏗️ Architecture
 
 **Backend (Django + Celery):**
+
 - Django REST API with JWT authentication
 - PostgreSQL database for data persistence
 - Celery workers for background post processing
@@ -30,6 +33,7 @@ A powerful, cloud-native web application that enables users to schedule Reddit p
 - Redis as message broker and cache
 
 **Frontend (React + TypeScript):**
+
 - Modern React with TypeScript and Vite
 - Shadcn/UI components with Tailwind CSS
 - React Router for navigation
@@ -37,6 +41,7 @@ A powerful, cloud-native web application that enables users to schedule Reddit p
 - Context-based state management
 
 **Infrastructure:**
+
 - Docker containerization with microservices architecture
 - Nginx reverse proxy for production
 - Horizontal scaling support for workers
@@ -45,69 +50,76 @@ A powerful, cloud-native web application that enables users to schedule Reddit p
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Docker and Docker Compose
-- Reddit API credentials ([Get them here](https://www.reddit.com/prefs/apps))
+- Reddit API credentials ([Get them here](https://old.reddit.com/prefs/apps))
 
 ### Development Setup
 
 1. **Clone the repository:**
+
 ```bash
 git clone https://github.com/kneelesh48/schedularr
 cd schedularr
 ```
 
-2. **Set up environment variables:**
+1. **Set up environment variables:**
+
 ```bash
 cp backend/.env.example backend/.env
 # Edit backend/.env with your Reddit API credentials
 ```
 
-3. **Start development services:**
-```bash
-# Backend (Django + Celery)
-cd backend
-uv run manage.py migrate
-uv run manage.py runserver
+1. **Start development services:**
 
-# Run Celery worker in another terminal
-uv run celery -A backend worker --loglevel=info
+   ```bash
+   # Backend (Django + Celery)
+   cd backend
+   uv run manage.py migrate
+   uv run manage.py runserver
 
-# Run Celery beat in another terminal
-uv run celery -A backend beat --loglevel=info
+   # Run Celery worker in another terminal
+   uv run celery -A backend worker --loglevel=info
 
-# Frontend
-cd frontend
-npm install
-npm run dev
-```
+   # Run Celery beat in another terminal
+   uv run celery -A backend beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
 
-4. **Access the application:**
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8000
-- Admin Panel: http://localhost:8000/admin
-- Swagger UI: http://localhost:8000/api/schema/swagger-ui/
+   # Frontend
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+2. **Access the application:**
+   - Frontend: [http://localhost:5173](http://localhost:5173)
+   - Backend API: [http://localhost:8000](http://localhost:8000)
+   - Admin Panel: [http://localhost:8000/admin](http://localhost:8000/admin)
+   - Swagger UI: [http://localhost:8000/api/schema/swagger-ui/](http://localhost:8000/api/schema/swagger-ui/)
 
 ### Production Deployment
 
 1. **Configure environment:**
-```bash
-cp backend/.env.example backend/.env
-# Update with production values
-```
+
+   ```bash
+   cp backend/.env.example backend/.env
+   # Update with production values
+   ```
 
 2. **Deploy with Docker:**
-```bash
-docker compose up -d
 
-# Apply database migrations
-docker compose exec web uv run manage.py migrate
+   ```bash
+   docker compose up -d
 
-# Create superuser (optional)
-docker compose exec web uv run manage.py createsuperuser
-```
+   # Apply database migrations
+   docker compose exec web uv run manage.py migrate
+
+   # Create superuser (optional)
+   docker compose exec web uv run manage.py createsuperuser
+   ```
 
 3. **Access production app:**
-- Application: http://localhost:8080
+
+   - Application: [http://localhost:8080](http://localhost:8080)
 
 > 📋 **For detailed production operations, scaling, and maintenance procedures, see [DEPLOYMENT.md](DEPLOYMENT.md)**
 
@@ -146,6 +158,7 @@ Check [backend/.env.example](backend/.env.example)
 ## 🔧 Development
 
 ### Backend Structure
+
 ```
 backend/
 ├── backend/           # Django project settings
@@ -155,6 +168,7 @@ backend/
 ```
 
 ### Frontend Structure
+
 ```
 frontend/
 ├── src/
@@ -185,6 +199,7 @@ npm run lint
 ## 📊 Scaling
 
 ### Horizontal Scaling
+
 ```bash
 # Scale workers for high load
 docker compose up -d --scale worker=5
@@ -194,6 +209,7 @@ docker compose up -d --scale web=3
 ```
 
 ### Monitoring
+
 ```bash
 # View service logs
 docker compose logs -f worker
