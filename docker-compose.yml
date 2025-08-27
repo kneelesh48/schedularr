@@ -6,15 +6,15 @@ services:
     container_name: schedularr-db
     environment:
       POSTGRES_DB: schedularr
-      POSTGRES_USER: reddit_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-reddit_pass_dev}
+      POSTGRES_USER: schedularr_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-schedularr_pass_dev}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U reddit_user -d schedularr"]
+      test: ["CMD-SHELL", "pg_isready -U schedularr_user -d schedularr"]
       interval: 30s
       timeout: 10s
       retries: 3
