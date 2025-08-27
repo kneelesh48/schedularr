@@ -1,12 +1,10 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
     container_name: schedularr-db
     environment:
-      POSTGRES_DB: schedularr
-      POSTGRES_USER: schedularr_user
+      POSTGRES_DB: ${POSTGRES_DB:-schedularr}
+      POSTGRES_USER: ${POSTGRES_USER:-schedularr_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-schedularr_pass_dev}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -41,10 +39,12 @@ services:
       context: .
       dockerfile: docker/worker.Dockerfile
     container_name: schedularr-worker
+    env_file:
+      - backend/.env
     environment:
       - DEBUG=False
       - SECRET_KEY=${SECRET_KEY}
-      - DATABASE_URL=postgres://reddit_user:${POSTGRES_PASSWORD:-reddit_pass_dev}@db:5432/schedularr
+      - DATABASE_URL=${DATABASE_URL}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND_URL=redis://redis:6379/0
       - REDDIT_CLIENT_ID=${REDDIT_CLIENT_ID}
@@ -56,18 +56,18 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
-    deploy:
-      replicas: 2
 
   beat:
     build:
       context: .
       dockerfile: docker/beat.Dockerfile
     container_name: schedularr-beat
+    env_file:
+      - backend/.env
     environment:
       - DEBUG=False
       - SECRET_KEY=${SECRET_KEY}
-      - DATABASE_URL=postgres://reddit_user:${POSTGRES_PASSWORD:-reddit_pass_dev}@db:5432/schedularr
+      - DATABASE_URL=${DATABASE_URL}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND_URL=redis://redis:6379/0
     depends_on:
@@ -82,10 +82,12 @@ services:
       context: .
       dockerfile: docker/web.Dockerfile
     container_name: schedularr-web
+    env_file:
+      - backend/.env
     environment:
       - DEBUG=False
       - SECRET_KEY=${SECRET_KEY}
-      - DATABASE_URL=postgres://reddit_user:${POSTGRES_PASSWORD:-reddit_pass_dev}@db:5432/schedularr
+      - DATABASE_URL=${DATABASE_URL}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND_URL=redis://redis:6379/0
       - REDDIT_CLIENT_ID=${REDDIT_CLIENT_ID}
