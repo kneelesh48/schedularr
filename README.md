@@ -100,10 +100,10 @@ cp backend/.env.example backend/.env
 docker compose up -d
 
 # Apply database migrations
-docker compose exec web uv run python manage.py migrate
+docker compose exec web uv run manage.py migrate
 
 # Create superuser (optional)
-docker compose exec web uv run python manage.py createsuperuser
+docker compose exec web uv run manage.py createsuperuser
 ```
 
 3. **Access production app:**
@@ -172,7 +172,7 @@ frontend/
 ```bash
 # Backend tests
 cd backend
-uv run python manage.py test
+uv run manage.py test
 
 # Frontend tests
 cd frontend
