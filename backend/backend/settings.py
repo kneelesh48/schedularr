@@ -229,7 +229,7 @@ CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
 
 # DRF Spectacular Settings
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Reddit Scheduler API',
+    'TITLE': 'Schedularr API',
     'DESCRIPTION': 'API for scheduling and managing Reddit posts with OAuth2 integration',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
