@@ -29,7 +29,7 @@ environ.Env.read_env(BASE_DIR / '.env')
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-default-key-for-dev-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=True)
@@ -146,8 +146,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.CustomUser'
 
 # Celery
-CELERY_BROKER_URL = env('CELERY_BROKER_URL')
-CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND_URL')
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND_URL', default='redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -180,10 +180,10 @@ CELERY_BEAT_SCHEDULE = {
 
 
 # Reddit API Credentials
-REDDIT_CLIENT_ID = env('REDDIT_CLIENT_ID')
-REDDIT_CLIENT_SECRET = env('REDDIT_CLIENT_SECRET')
-REDDIT_REDIRECT_URI = env('REDDIT_REDIRECT_URI')
-REDDIT_USER_AGENT = env('REDDIT_USER_AGENT')
+REDDIT_CLIENT_ID = env('REDDIT_CLIENT_ID', default='')
+REDDIT_CLIENT_SECRET = env('REDDIT_CLIENT_SECRET', default='')
+REDDIT_REDIRECT_URI = env('REDDIT_REDIRECT_URI', default='http://localhost:8000/reddit/callback')
+REDDIT_USER_AGENT = env('REDDIT_USER_AGENT', default='django-reddit-scheduler:v1.0')
 
 # Frontend URL for redirects
 FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173')
