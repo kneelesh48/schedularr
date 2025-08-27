@@ -221,9 +221,11 @@ CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
     "http://127.0.0.1:5173",
 ])
 CORS_ALLOW_CREDENTIALS = True
-# Optional: Specify allowed methods and headers if defaults aren't enough
-# CORS_ALLOW_METHODS = [...]
-# CORS_ALLOW_HEADERS = [...]
+
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+])
 
 # DRF Spectacular Settings
 SPECTACULAR_SETTINGS = {
