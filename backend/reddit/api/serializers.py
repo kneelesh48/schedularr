@@ -55,6 +55,7 @@ class ScheduledPostSerializer(serializers.ModelSerializer):
             "title",
             "selftext",
             "cron_schedule",
+            "user_timezone",
             "end_date",
             "next_run",
             "status",

@@ -58,6 +58,7 @@ class ScheduledPost(models.Model):
     title = models.CharField(max_length=300)
     selftext = models.TextField()
     cron_schedule = models.CharField(max_length=100)
+    user_timezone = models.CharField(max_length=50, default='UTC', help_text="User's timezone for interpreting cron schedule")
     next_run = models.DateTimeField(null=True, blank=True, db_index=True)
     end_date = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="active", db_index=True)

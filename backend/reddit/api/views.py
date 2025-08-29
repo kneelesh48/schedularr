@@ -8,7 +8,11 @@ from rest_framework.exceptions import ValidationError
 
 from ..utils import calculate_next_run
 from ..models import RedditAccount, ScheduledPost, SubmittedPost
-from .serializers import ScheduledPostSerializer, RedditAccountSerializer, SubmittedPostSerializer
+from .serializers import (
+    ScheduledPostSerializer,
+    RedditAccountSerializer,
+    SubmittedPostSerializer,
+)
 
 User = get_user_model()
 
@@ -124,9 +128,10 @@ class ScheduledPostListView(generics.ListCreateAPIView):
             raise ValidationError("You must link at least one Reddit account before creating scheduled posts.")
 
         cron_schedule = serializer.validated_data.get("cron_schedule")
+        user_timezone = serializer.validated_data.get("user_timezone", "UTC")
         next_run = None
         if cron_schedule:
-            next_run = calculate_next_run(cron_schedule)
+            next_run = calculate_next_run(cron_schedule, user_timezone)
             if next_run is None:
                 raise ValidationError(f"Failed to calculate next run time for cron schedule: {cron_schedule}")
 
@@ -143,16 +148,23 @@ class ScheduledPostDetailView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         instance = serializer.instance
         original_cron_schedule = instance.cron_schedule
+        original_user_timezone = instance.user_timezone
 
         new_cron_schedule = serializer.validated_data.get(
             "cron_schedule", original_cron_schedule
         )
+        new_user_timezone = serializer.validated_data.get(
+            "user_timezone", original_user_timezone
+        )
 
         next_run = instance.next_run
 
-        if new_cron_schedule != original_cron_schedule:
+        if (
+            new_cron_schedule != original_cron_schedule
+            or new_user_timezone != original_user_timezone
+        ):
             if new_cron_schedule:
-                next_run = calculate_next_run(new_cron_schedule)
+                next_run = calculate_next_run(new_cron_schedule, new_user_timezone)
                 if next_run is None:
                     raise ValidationError(
                         f"Failed to calculate next run time for cron schedule: {new_cron_schedule}"
@@ -170,7 +182,7 @@ class SubmittedPostListView(generics.ListAPIView):
     def get_queryset(self):
         return SubmittedPost.objects.filter(
             scheduled_post__user=self.request.user
-        ).select_related('scheduled_post')
+        ).select_related("scheduled_post")
 
 
 class SubmittedPostDetailView(generics.RetrieveAPIView):
@@ -180,7 +192,7 @@ class SubmittedPostDetailView(generics.RetrieveAPIView):
     def get_queryset(self):
         return SubmittedPost.objects.filter(
             scheduled_post__user=self.request.user
-        ).select_related('scheduled_post')
+        ).select_related("scheduled_post")
 
 
 class ScheduledPostSubmittedPostsView(generics.ListAPIView):
@@ -188,8 +200,8 @@ class ScheduledPostSubmittedPostsView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        scheduled_post_id = self.kwargs['scheduled_post_id']
+        scheduled_post_id = self.kwargs["scheduled_post_id"]
         return SubmittedPost.objects.filter(
             scheduled_post=scheduled_post_id,
             scheduled_post__user=self.request.user
-        ).select_related('scheduled_post')
+        ).select_related("scheduled_post")
