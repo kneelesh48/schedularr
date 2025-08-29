@@ -82,6 +82,7 @@ export interface ScheduledPost {
   title: string;
   selftext: string;
   cron_schedule: string | null;
+  user_timezone: string;
   next_run: string | null;
   end_date: string | null;
   status: 'active' | 'paused' | 'completed' | 'error';

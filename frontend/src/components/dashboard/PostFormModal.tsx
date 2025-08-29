@@ -158,6 +158,7 @@ export function PostFormModal({
       selftext: body.trim(),
       reddit_account: redditAccount,
       cron_schedule: cronSchedule.trim() === "" ? null : cronSchedule.trim(),
+      user_timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       end_date: endDate ? new Date(endDate).toISOString() : null,
     };
 
