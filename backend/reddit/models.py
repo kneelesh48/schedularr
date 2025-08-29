@@ -57,7 +57,7 @@ class ScheduledPost(models.Model):
     subreddit = models.CharField(max_length=100)
     title = models.CharField(max_length=300)
     selftext = models.TextField()
-    cron_schedule = models.CharField(max_length=100)
+    cron_schedule = models.CharField(max_length=100, null=True, blank=True)
     user_timezone = models.CharField(max_length=50, default='UTC', help_text="User's timezone for interpreting cron schedule")
     next_run = models.DateTimeField(null=True, blank=True, db_index=True)
     end_date = models.DateTimeField(null=True, blank=True)
