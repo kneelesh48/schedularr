@@ -90,14 +90,13 @@ export function PostsTable({
   };
 
   const formatDateTime = (dateTimeString: string | null) => {
-    console.log(dateTimeString);
     if (!dateTimeString) return "Not scheduled";
 
     try {
       const date = new Date(dateTimeString);
       const now = new Date();
       const diffMs = date.getTime() - now.getTime();
-      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
       if (diffDays < 0) {
         return "Past due";
