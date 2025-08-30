@@ -86,14 +86,14 @@ def submit_reddit_post(self, post_id):
         )
         # update_reddit_account_status.delay(post.reddit_account.id)
 
-        next_run = None
-        next_run = calculate_next_run(post.cron_schedule, post.user_timezone)
-        if next_run is None:
-            post.status = "error"
-            post.last_submission_error = "Failed to calculate next run time."
-            post.next_run = None
-            post.save()
-            return
+        if post.cron_schedule:
+            next_run = calculate_next_run(post.cron_schedule, post.user_timezone)
+            if next_run is None:
+                post.status = "error"
+                post.last_submission_error = "Failed to calculate next run time."
+                post.next_run = None
+                post.save()
+                return
 
         if not post.cron_schedule:
             post.status = "completed"
