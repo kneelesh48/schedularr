@@ -76,7 +76,8 @@ export const getThemeClass = (
   category: keyof typeof currentTheme,
   variant: string
 ) => {
-  return (currentTheme as any)[category]?.[variant] || "";
+  const themeCategory = currentTheme[category] as Record<string, string>;
+  return themeCategory?.[variant] || "";
 };
 
 export const getThemeColor = (colorKey: 500 | 600 | 700) => {
