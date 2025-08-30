@@ -13,6 +13,7 @@ from google import genai
 from google.genai import types
 
 from ..utils import calculate_next_run
+from ..tasks import submit_reddit_post
 from ..models import RedditAccount, ScheduledPost, SubmittedPost
 from .serializers import (
     ScheduledPostSerializer,
@@ -218,13 +219,37 @@ class ScheduledPostSubmittedPostsView(generics.ListAPIView):
         ).select_related("scheduled_post")
 
 
+class PostNowView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            scheduled_post = ScheduledPost.objects.get(pk=pk, user=request.user)
+        except ScheduledPost.DoesNotExist:
+            return Response(
+                {"error": "Scheduled post not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        scheduled_post.status = "queued"
+        scheduled_post.save(update_fields=["status", "updated_at"])
+        task = submit_reddit_post.delay(scheduled_post.id)
+
+        return Response(
+            {
+                "message": "Post added to queue for immediate execution",
+                "task_id": task.id,
+                "post_id": scheduled_post.id,
+            }
+        )
+
+
 class TextToCronView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=TextToCronRequestSerializer,
         responses={200: TextToCronResponseSerializer},
-        description="Convert natural language schedule description to cron expression",
         tags=["utils"],
     )
     def post(self, request):
@@ -282,7 +307,9 @@ Return only the cron expression:"""
             )
         except ValueError:
             return Response(
-                {"error": "Could not determine a valid schedule. Please try rephrasing your request."},
+                {
+                    "error": "Could not determine a valid schedule. Please try rephrasing your request."
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
