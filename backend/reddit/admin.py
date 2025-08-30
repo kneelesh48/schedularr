@@ -7,7 +7,7 @@ class RedditAccountAdmin(admin.ModelAdmin):
     list_filter = ("reddit_account_status",)
 
 class ScheduledPostAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "reddit_account", "subreddit", "title", "status", "next_run")
+    list_display = ("id", "user", "reddit_account", "subreddit", "title", "status", "last_run_started", "next_run")
 
 class SubmittedPostAdmin(admin.ModelAdmin):
     list_display = ("reddit_post_id", "scheduled_post", "reddit_url", "submitted_at")
