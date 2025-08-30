@@ -1,3 +1,5 @@
+import os
+
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from rest_framework import generics, status
@@ -5,6 +7,10 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from drf_spectacular.utils import extend_schema
+
+from google import genai
+from google.genai import types
 
 from ..utils import calculate_next_run
 from ..models import RedditAccount, ScheduledPost, SubmittedPost
@@ -12,6 +18,8 @@ from .serializers import (
     ScheduledPostSerializer,
     RedditAccountSerializer,
     SubmittedPostSerializer,
+    TextToCronRequestSerializer,
+    TextToCronResponseSerializer,
 )
 
 User = get_user_model()
@@ -125,7 +133,9 @@ class ScheduledPostListView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         if not self.request.user.reddit_accounts.exists():
-            raise ValidationError("You must link at least one Reddit account before creating scheduled posts.")
+            raise ValidationError(
+                "You must link at least one Reddit account before creating scheduled posts."
+            )
 
         cron_schedule = serializer.validated_data.get("cron_schedule")
         user_timezone = serializer.validated_data.get("user_timezone", "UTC")
@@ -133,7 +143,9 @@ class ScheduledPostListView(generics.ListCreateAPIView):
         if cron_schedule:
             next_run = calculate_next_run(cron_schedule, user_timezone)
             if next_run is None:
-                raise ValidationError(f"Failed to calculate next run time for cron schedule: {cron_schedule}")
+                raise ValidationError(
+                    f"Failed to calculate next run time for cron schedule: {cron_schedule}"
+                )
 
         serializer.save(user=self.request.user, next_run=next_run)
 
@@ -202,6 +214,79 @@ class ScheduledPostSubmittedPostsView(generics.ListAPIView):
     def get_queryset(self):
         scheduled_post_id = self.kwargs["scheduled_post_id"]
         return SubmittedPost.objects.filter(
-            scheduled_post=scheduled_post_id,
-            scheduled_post__user=self.request.user
+            scheduled_post=scheduled_post_id, scheduled_post__user=self.request.user
         ).select_related("scheduled_post")
+
+
+class TextToCronView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        request=TextToCronRequestSerializer,
+        responses={200: TextToCronResponseSerializer},
+        description="Convert natural language schedule description to cron expression",
+        tags=["utils"],
+    )
+    def post(self, request):
+        serializer = TextToCronRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        schedule_text = serializer.validated_data["schedule_text"]
+
+        try:
+            client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
+            prompt = f"""Convert the following cron schedule description into a standard cron expression (minute hour day month weekday format).
+            
+Cron schedule description: "{schedule_text}"
+
+Requirements:
+- Return ONLY the cron expression, no explanation
+- Use standard 5-field cron format (minute hour day month weekday)
+- Use * for any field
+- Use 0-6 for weekday (0=Sunday, 1=Monday, etc.)
+- Return INVALID if it can't be converted to a proper cron schedule
+- Examples:
+  - "Every Monday at 9 AM" -> "0 9 * * 1"
+  - "Daily at 3 PM" -> "0 15 * * *"
+  - "Every weekday at 8:30 AM" -> "30 8 * * 1-5"
+  - "invalid text" -> "INVALID"
+
+Return only the cron expression:"""
+
+            response = client.models.generate_content(
+                model="gemini-2.5-flash-lite",
+                contents=types.Content(
+                    role="user", parts=[types.Part.from_text(text=prompt)]
+                ),
+                config=types.GenerateContentConfig(
+                    thinking_config=types.ThinkingConfig(
+                        thinking_budget=0,
+                    ),
+                ),
+            )
+
+            cron_schedule = response.candidates[0].content.parts[0].text.strip()
+
+            # validation
+            cron_parts = cron_schedule.split()
+            if len(cron_parts) != 5:
+                raise ValueError("Invalid cron format returned")
+
+            next_run = calculate_next_run(cron_schedule, "UTC")
+            if next_run is None:
+                raise ValueError("Invalid cron schedule generated")
+
+            return Response(
+                {"cron_schedule": cron_schedule, "schedule_text": schedule_text}
+            )
+        except ValueError:
+            return Response(
+                {"error": "Could not determine a valid schedule. Please try rephrasing your request."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"An unexpected error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

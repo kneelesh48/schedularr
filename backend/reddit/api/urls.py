@@ -9,6 +9,9 @@ urlpatterns = [
     path('user/reddit-login-url/', views.RedditLoginUrlView.as_view(), name='api_reddit_login_url'),
     path('dashboard/', views.DashboardView.as_view(), name='api_dashboard'),
 
+    # Utility endpoints
+    path('convert-cron/', views.TextToCronView.as_view(), name='api_convert_cron'),
+
     # Posts endpoints
     path('posts/', views.ScheduledPostListView.as_view(), name='api_posts_list_create'),
     path('posts/<int:pk>/', views.ScheduledPostDetailView.as_view(), name='api_posts_detail'),

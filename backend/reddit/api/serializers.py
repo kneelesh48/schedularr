@@ -136,3 +136,19 @@ class SubmittedPostSerializer(serializers.ModelSerializer):
             "removed_by",
             "updated_at",
         ]
+
+
+class TextToCronRequestSerializer(serializers.Serializer):
+    schedule_text = serializers.CharField(
+        max_length=500,
+        help_text="Text description of the schedule (e.g., 'Every Monday at 9 AM', 'Daily at 3 PM')"
+    )
+
+
+class TextToCronResponseSerializer(serializers.Serializer):
+    schedule_text = serializers.CharField(
+        help_text="Original text that was converted"
+    )
+    cron_schedule = serializers.CharField(
+        help_text="Generated cron expression in 5-field format (minute hour day month weekday)"
+    )
