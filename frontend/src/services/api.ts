@@ -198,3 +198,12 @@ export const unlinkRedditAccount = async (accountId: number): Promise<void> => {
     data: { reddit_account_id: accountId }
   });
 };
+
+export const convertTextToCron = async (scheduleText: string): Promise<{ cron_schedule: string; schedule_text: string }> => {
+  return withErrorHandling(async () => {
+    const response = await apiClient.post('/api/reddit/convert-cron/', {
+      schedule_text: scheduleText
+    });
+    return response.data;
+  });
+};
