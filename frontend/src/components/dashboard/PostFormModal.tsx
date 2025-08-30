@@ -33,6 +33,7 @@ import {
   Info,
   AlertCircle,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 import { currentTheme } from "@/lib/themes";
 
@@ -41,6 +42,7 @@ import {
   updateScheduledPost,
   getScheduledPost,
   getDashboardData,
+  convertTextToCron,
 } from "@/services/api";
 import type { ScheduledPostData, RedditAccount } from "@/types/api";
 
@@ -78,6 +80,7 @@ export function PostFormModal({
   const [subreddit, setSubreddit] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [textSchedule, settextSchedule] = useState("");
   const [cronSchedule, setCronSchedule] = useState("");
   const [endDate, setEndDate] = useState<string | null>(null);
   const [redditAccount, setRedditAccount] = useState<number | null>(null);
@@ -85,6 +88,7 @@ export function PostFormModal({
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConverting, setIsConverting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isEdit = postId !== null && postId !== undefined;
@@ -96,6 +100,7 @@ export function PostFormModal({
       setSubreddit("");
       setTitle("");
       setBody("");
+      settextSchedule("");
       setCronSchedule("");
       setEndDate(null);
       setRedditAccount(null);
@@ -182,27 +187,23 @@ export function PostFormModal({
 
       let errorMessage = `Failed to ${isEdit ? "update" : "schedule"} post. Please try again.`;
 
-      if (typeof err === "object" && err !== null && "response" in err) {
-        type ErrorResponseData = Record<string, string | string[]> | string;
-        const axiosError = err as {
-          response?: { data?: ErrorResponseData; status?: number };
-        };
-        if (axiosError.response && axiosError.response.data) {
-          const responseData = axiosError.response.data;
-          if (typeof responseData === "object" && responseData !== null) {
-            const messages = Object.entries(responseData)
-              .map(
-                ([field, messages]) =>
-                  `${field}: ${
-                    Array.isArray(messages) ? messages.join(", ") : messages
-                  }`
-              )
-              .join("; ");
-            if (messages) {
-              errorMessage = `Validation failed: ${messages}`;
-            }
-          } else if (typeof responseData === "string") {
-            errorMessage = responseData;
+      if (typeof err === "object" && err !== null) {
+        if ('message' in err && typeof err.message === 'string') {
+          errorMessage = err.message;
+        }
+
+        // Handle detailed validation errors
+        if ('details' in err && typeof err.details === 'object') {
+          const details = err.details as Record<string, string | string[]>;
+          const messages = Object.entries(details)
+            .map(
+              ([field, messages]) =>
+                `${field}: ${Array.isArray(messages) ? messages.join(", ") : messages
+                }`
+            )
+            .join("; ");
+          if (messages) {
+            errorMessage = `Validation failed: ${messages}`;
           }
         }
       }
@@ -213,6 +214,32 @@ export function PostFormModal({
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleConvertToCron = async () => {
+    if (!textSchedule.trim()) {
+      toast.error("Please enter a schedule description");
+      return;
+    }
+
+    setIsConverting(true);
+    try {
+      const result = await convertTextToCron(textSchedule.trim());
+      setCronSchedule(result.cron_schedule);
+    } catch (err: unknown) {
+      console.error("Failed to convert schedule:", err);
+
+      let errorMessage = "Failed to convert schedule. Please try again.";
+      if (typeof err === "object" && err !== null && "message" in err && typeof err.message === "string" && !!err.message) {
+        errorMessage = err.message;
+      }
+
+      toast.error("Conversion failed", {
+        description: errorMessage,
+      });
+    } finally {
+      setIsConverting(false);
     }
   };
 
@@ -359,44 +386,83 @@ export function PostFormModal({
               </div>
 
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cronSchedule">
-                    <div className="flex items-center space-x-2">
-                      <Clock className="h-4 w-4" />
-                      <span>Cron Schedule</span>
-                    </div>
-                  </Label>
-                  <Input
-                    id="cronSchedule"
-                    placeholder="e.g., 0 9 * * 1 (Every Monday at 9 AM)"
-                    value={cronSchedule}
-                    onChange={(e) => setCronSchedule(e.target.value)}
-                    disabled={isSubmitting}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Leave blank for one-time post. Use standard cron format
-                    (minute hour day month weekday).
-                  </p>
-                </div>
-
-                {cronSchedule && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="endDate">
+                    <Label htmlFor="textSchedule">
                       <div className="flex items-center space-x-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>End Date</span>
+                        <MessageCircle className="h-4 w-4" />
+                        <span>Schedule Description</span>
+                      </div>
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="textSchedule"
+                        placeholder="Every Monday at 9 AM"
+                        value={textSchedule}
+                        onChange={(e) => settextSchedule(e.target.value)}
+                        disabled={isSubmitting || isConverting}
+                        className="pr-12"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleConvertToCron}
+                        disabled={isSubmitting || isConverting || !textSchedule.trim()}
+                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                      >
+                        {isConverting ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Describe your schedule in plain text
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="cronSchedule">
+                      <div className="flex items-center space-x-2">
+                        <Clock className="h-4 w-4" />
+                        <span>Cron Schedule</span>
                       </div>
                     </Label>
                     <Input
-                      id="endDate"
-                      type="datetime-local"
-                      value={endDate || ""}
-                      onChange={(e) => setEndDate(e.target.value || null)}
+                      id="cronSchedule"
+                      placeholder="0 9 * * 1"
+                      value={cronSchedule}
+                      onChange={(e) => setCronSchedule(e.target.value)}
                       disabled={isSubmitting}
                     />
                     <p className="text-xs text-muted-foreground">
-                      When should the recurring posts stop? (Optional)
+                      Leave blank for one-time post. Use standard cron format.
                     </p>
+                  </div>
+                </div>
+
+                {cronSchedule && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="endDate">
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="h-4 w-4" />
+                          <span>End Date</span>
+                        </div>
+                      </Label>
+                      <Input
+                        id="endDate"
+                        type="datetime-local"
+                        value={endDate || ""}
+                        onChange={(e) => setEndDate(e.target.value || null)}
+                        disabled={isSubmitting}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        When should the recurring posts stop? (Optional)
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
