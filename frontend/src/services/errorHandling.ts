@@ -6,6 +6,15 @@ export function createApiError(error: AxiosError): ApiError {
   const status = error.response?.status;
   const data = error.response?.data as Record<string, unknown>;
 
+  if (status === 400) {
+    return {
+      message: (data.error as string) || (data.message as string) || 'Bad request',
+      code: 'BAD_REQUEST',
+      status,
+      details: data
+    };
+  }
+
   if (status === 422 && data?.field_errors) {
     return {
       message: (data.message as string) || 'Validation failed',
