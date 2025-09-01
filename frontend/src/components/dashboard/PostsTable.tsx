@@ -25,10 +25,12 @@ import {
   AlertCircle,
   Pause,
   Calendar,
+  Play,
 } from "lucide-react";
 
 import { currentTheme } from "@/lib/themes";
 import type { ScheduledPost } from "@/types/api";
+import { postNow } from "@/services/api";
 
 
 interface PostsTableProps {
@@ -89,7 +91,7 @@ export function PostsTable({
     }
   };
 
-  const formatDateTime = (dateTimeString: string | null) => {
+  const formatNextRun = (dateTimeString: string | null) => {
     if (!dateTimeString) return "Not scheduled";
 
     try {
@@ -133,6 +135,36 @@ export function PostsTable({
     } catch {
       return "Invalid Date";
     }
+  };
+
+  const formatLastRun = (dateTimeString: string | null) => {
+    if (!dateTimeString) return "Never";
+
+    try {
+      const date = new Date(dateTimeString);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffMinutes < 1) return "Just now";
+      if (diffMinutes < 60) return `${diffMinutes}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffDays < 7) return `${diffDays}d ago`;
+
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric"
+      });
+    } catch {
+      return "Invalid Date";
+    }
+  };
+
+  const truncateTitle = (title: string, maxLength: number = 50) => {
+    if (title.length <= maxLength) return title;
+    return title.substring(0, maxLength) + "...";
   };
 
   if (isLoading) {
@@ -185,8 +217,9 @@ export function PostsTable({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Post</TableHead>
                     <TableHead className="hidden sm:table-cell">Account</TableHead>
+                    <TableHead>Post</TableHead>
+                    <TableHead className="hidden md:table-cell">Last Run</TableHead>
                     <TableHead className="hidden md:table-cell">Next Run</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -195,27 +228,32 @@ export function PostsTable({
                 <TableBody>
                   {posts.map((post) => (
                     <TableRow key={post.id} className="hover:bg-gray-50">
+                      <TableCell className="hidden sm:table-cell">
+                        <div className="text-sm">
+                          u/{post.reddit_account_username}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <div className="space-y-1">
                           <div
                             className="font-medium line-clamp-1"
                             title={post.title}
                           >
-                            {post.title}
+                            {truncateTitle(post.title)}
                           </div>
                           <div className="text-sm text-muted-foreground">
                             r/{post.subreddit}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell">
+                      <TableCell className="hidden md:table-cell">
                         <div className="text-sm">
-                          u/{post.reddit_account_username}
+                          {formatLastRun(post.last_run_started)}
                         </div>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
                         <div className="text-sm">
-                          {formatDateTime(post.next_run)}
+                          {formatNextRun(post.next_run)}
                         </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(post.status)}</TableCell>
@@ -233,6 +271,13 @@ export function PostsTable({
                             >
                               <Edit className="mr-2 h-4 w-4" />
                               Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => postNow(post.id)}
+                              className="flex items-center"
+                            >
+                              <Play className="mr-2 h-4 w-4" />
+                              Post Now
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem

@@ -181,7 +181,7 @@ export const getRedditAccounts = async (): Promise<RedditAccount[]> => {
 };
 
 export const getSubmittedPosts = async (scheduledPostId?: number): Promise<SubmittedPost[]> => {
-  const url = scheduledPostId 
+  const url = scheduledPostId
     ? `/api/reddit/posts/${scheduledPostId}/submissions/`
     : '/api/reddit/submissions/';
   const response = await apiClient.get(url);
@@ -205,5 +205,11 @@ export const convertTextToCron = async (scheduleText: string): Promise<{ cron_sc
       schedule_text: scheduleText
     });
     return response.data;
+  });
+};
+
+export const postNow = async (postId: number): Promise<void> => {
+  return withErrorHandling(async () => {
+    await apiClient.post(`/api/reddit/posts/${postId}/post-now/`);
   });
 };
