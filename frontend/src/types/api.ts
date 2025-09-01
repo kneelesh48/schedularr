@@ -117,12 +117,16 @@ export type ScheduledPostUpdate = Partial<ScheduledPostData>;
 export interface SubmittedPost {
   id: number;
   scheduled_post: number;
+  reddit_account: number;
+  subreddit: string;
+  title: string;
+  selftext: string;
   reddit_post_id: string;
   reddit_url: string | null;
   submitted_at: string;
+  updated_at: string;
   removed_at: string | null;
   removed_by: string | null;
-  updated_at: string;
 }
 
 // ===== Dashboard Types =====

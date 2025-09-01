@@ -81,6 +81,10 @@ def submit_reddit_post(self, post_id):
 
         SubmittedPost.objects.create(
             scheduled_post=post,
+            reddit_account=post.reddit_account,
+            subreddit=post.subreddit,
+            title=post.title,
+            selftext=post.selftext,
             reddit_post_id=submission.id,
             reddit_url=f"https://www.reddit.com{submission.permalink}",
         )

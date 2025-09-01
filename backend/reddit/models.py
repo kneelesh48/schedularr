@@ -49,19 +49,27 @@ class ScheduledPost(models.Model):
         related_name="scheduled_posts",
     )
     reddit_account = models.ForeignKey(
-        'RedditAccount',
+        "RedditAccount",
         on_delete=models.CASCADE,
         related_name="scheduled_posts",
-        help_text="Which Reddit account to use for posting"
+        help_text="Which Reddit account to use for posting",
     )
+
     subreddit = models.CharField(max_length=100)
     title = models.CharField(max_length=300)
     selftext = models.TextField()
+
     cron_schedule = models.CharField(max_length=100, null=True, blank=True)
-    user_timezone = models.CharField(max_length=50, default='UTC', help_text="User's timezone for interpreting cron schedule")
+    user_timezone = models.CharField(
+        max_length=50,
+        default="UTC",
+        help_text="User's timezone for interpreting cron schedule",
+    )
     next_run = models.DateTimeField(null=True, blank=True, db_index=True)
     end_date = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="active", db_index=True)
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default="active", db_index=True
+    )
     last_submission_error = models.TextField(null=True, blank=True)
 
     last_run_started = models.DateTimeField(null=True, blank=True)
@@ -82,18 +90,38 @@ class ScheduledPost(models.Model):
 
 
 class SubmittedPost(models.Model):
-    scheduled_post = models.ForeignKey(
-        'ScheduledPost',
-        on_delete=models.CASCADE,
-        related_name="submitted_posts",
-        help_text="The scheduled post this submission came from"
+    reddit_account = models.ForeignKey(
+        "RedditAccount",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="submission_history",
+        help_text="The specific Reddit account used for this submission.",
     )
+    scheduled_post = models.ForeignKey(
+        "ScheduledPost",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="submitted_posts",
+        help_text="The scheduled post this submission came from",
+    )
+
+    subreddit = models.CharField(default="", max_length=100, help_text="Subreddit at time of submission")
+    title = models.CharField(default="", max_length=300, help_text="Title at time of submission")
+    selftext = models.TextField(default="", help_text="Selftext at time of submission")
+
     reddit_post_id = models.CharField(max_length=20, unique=True, db_index=True)
     reddit_url = models.URLField(null=True, blank=True, help_text="Full Reddit URL of the post")
+
     submitted_at = models.DateTimeField(auto_now_add=True)
-    removed_at = models.DateTimeField(null=True, blank=True, help_text="When the post was removed")
-    removed_by = models.CharField(max_length=100, null=True, blank=True, help_text="Who removed the post (moderator, admin, etc.)")
     updated_at = models.DateTimeField(auto_now=True)
+    removed_at = models.DateTimeField(null=True, blank=True, help_text="When the post was removed")
+    removed_by = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text="Who removed the post (moderator, admin, etc.)",
+    )
 
     class Meta:
         ordering = ["-submitted_at"]
@@ -103,9 +131,9 @@ class SubmittedPost(models.Model):
         ]
 
     def __str__(self):
-        return f"r/{self.scheduled_post.subreddit}: '{self.scheduled_post.title}' (ID: {self.reddit_post_id})"
+        return f"r/{self.subreddit}: '{self.title}' (ID: {self.reddit_post_id})"
 
     def save(self, *args, **kwargs):
         if self.reddit_post_id and not self.reddit_url:
-            self.reddit_url = f"https://reddit.com/r/{self.scheduled_post.subreddit}/comments/{self.reddit_post_id}/"
+            self.reddit_url = f"https://reddit.com/r/{self.subreddit}/comments/{self.reddit_post_id}/"
         super().save(*args, **kwargs)

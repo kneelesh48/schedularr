@@ -195,7 +195,7 @@ class SubmittedPostListView(generics.ListAPIView):
     def get_queryset(self):
         return SubmittedPost.objects.filter(
             scheduled_post__user=self.request.user
-        ).select_related("scheduled_post")
+        ).select_related("scheduled_post", "reddit_account")
 
 
 class SubmittedPostDetailView(generics.RetrieveAPIView):
@@ -205,7 +205,7 @@ class SubmittedPostDetailView(generics.RetrieveAPIView):
     def get_queryset(self):
         return SubmittedPost.objects.filter(
             scheduled_post__user=self.request.user
-        ).select_related("scheduled_post")
+        ).select_related("scheduled_post", "reddit_account")
 
 
 class ScheduledPostSubmittedPostsView(generics.ListAPIView):
@@ -216,7 +216,7 @@ class ScheduledPostSubmittedPostsView(generics.ListAPIView):
         scheduled_post_id = self.kwargs["scheduled_post_id"]
         return SubmittedPost.objects.filter(
             scheduled_post=scheduled_post_id, scheduled_post__user=self.request.user
-        ).select_related("scheduled_post")
+        ).select_related("scheduled_post", "reddit_account")
 
 
 class PostNowView(APIView):

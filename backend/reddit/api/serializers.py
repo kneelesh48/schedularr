@@ -78,9 +78,9 @@ class ScheduledPostSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        request = self.context.get('request')
-        if request and hasattr(request, 'user') and request.user.is_authenticated:
-            self.fields['reddit_account'].queryset = RedditAccount.objects.filter(user=request.user)
+        request = self.context.get("request")
+        if request and hasattr(request, "user") and request.user.is_authenticated:
+            self.fields["reddit_account"].queryset = RedditAccount.objects.filter(user=request.user)
 
     def validate_cron_schedule(self, value):
         # If the value is empty or None, it's considered valid (e.g., one-time post)
@@ -107,48 +107,47 @@ class ScheduledPostSerializer(serializers.ModelSerializer):
 
 
 class SubmittedPostSerializer(serializers.ModelSerializer):
-    scheduled_post_title = serializers.CharField(source="scheduled_post.title", read_only=True)
-    subreddit = serializers.CharField(source="scheduled_post.subreddit", read_only=True)
-
     class Meta:
         model = SubmittedPost
         fields = [
             "id",
             "scheduled_post",
-            "scheduled_post_title",
-            "subreddit", 
+            "reddit_account",
+            "subreddit",
+            "title",
+            "selftext",
             "reddit_post_id",
             "reddit_url",
             "submitted_at",
+            "updated_at",
             "removed_at",
             "removed_by",
-            "updated_at",
         ]
         read_only_fields = [
             "id",
             "scheduled_post",
-            "scheduled_post_title",
+            "reddit_account",
             "subreddit",
+            "title",
+            "selftext",
             "reddit_post_id",
             "reddit_url",
             "submitted_at",
+            "updated_at",
             "removed_at",
             "removed_by",
-            "updated_at",
         ]
 
 
 class TextToCronRequestSerializer(serializers.Serializer):
     schedule_text = serializers.CharField(
         max_length=500,
-        help_text="Text description of the schedule (e.g., 'Every Monday at 9 AM', 'Daily at 3 PM')"
+        help_text="Text description of the schedule (e.g., 'Every Monday at 9 AM', 'Daily at 3 PM')",
     )
 
 
 class TextToCronResponseSerializer(serializers.Serializer):
-    schedule_text = serializers.CharField(
-        help_text="Original text that was converted"
-    )
+    schedule_text = serializers.CharField(help_text="Original text that was converted")
     cron_schedule = serializers.CharField(
         help_text="Generated cron expression in 5-field format (minute hour day month weekday)"
     )
