@@ -113,6 +113,7 @@ class SubmittedPostSerializer(serializers.ModelSerializer):
             "id",
             "scheduled_post",
             "reddit_account",
+            "reddit_username",
             "subreddit",
             "title",
             "selftext",
@@ -126,6 +127,7 @@ class SubmittedPostSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id",
             "scheduled_post",
+            "reddit_account",
             "reddit_account",
             "subreddit",
             "title",

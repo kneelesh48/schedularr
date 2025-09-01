@@ -118,6 +118,7 @@ export interface SubmittedPost {
   id: number;
   scheduled_post: number;
   reddit_account: number;
+  reddit_username: string;
   subreddit: string;
   title: string;
   selftext: string;

@@ -106,6 +106,7 @@ class SubmittedPost(models.Model):
         help_text="The scheduled post this submission came from",
     )
 
+    reddit_username = models.CharField(default="", max_length=100, help_text="Reddit username at time of submission")
     subreddit = models.CharField(default="", max_length=100, help_text="Subreddit at time of submission")
     title = models.CharField(default="", max_length=300, help_text="Title at time of submission")
     selftext = models.TextField(default="", help_text="Selftext at time of submission")
