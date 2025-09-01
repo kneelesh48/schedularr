@@ -23,7 +23,6 @@ class ScheduledPostAdmin(admin.ModelAdmin):
 class SubmittedPostAdmin(admin.ModelAdmin):
     list_display = (
         "reddit_post_id",
-        "reddit_account",
         "reddit_username",
         "reddit_url",
         "title",
